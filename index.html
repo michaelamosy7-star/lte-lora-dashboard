@@ -65,6 +65,7 @@
       text-decoration: underline;
       cursor: pointer;
       font-size: 0.9rem;
+      width: 100%;
     }
     .alert-msg {
       padding: 10px;
@@ -100,9 +101,7 @@
       <button type="submit" id="submitBtn">Sign In</button>
     </form>
 
-    <div style="text-align: center;">
-      <button class="toggle-btn" id="toggleBtn" onclick="toggleMode()">Need an account? Create One</button>
-    </div>
+    <button type="button" class="toggle-btn" id="toggleBtn">Need an account? Create One</button>
   </div>
 
 <script>
@@ -131,7 +130,8 @@
     }
   });
 
-  function toggleMode() {
+  // Event listener for toggling mode
+  toggleBtn.addEventListener('click', function() {
     isSignUpMode = !isSignUpMode;
     alertBox.style.display = 'none';
     if (isSignUpMode) {
@@ -143,7 +143,7 @@
       submitBtn.innerText = "Sign In";
       toggleBtn.innerText = "Need an account? Create One";
     }
-  }
+  });
 
   function showAlert(msg, type) {
     alertBox.innerText = msg;
@@ -165,7 +165,7 @@
           userCredential.user.sendEmailVerification().then(() => {
             showAlert("Account created! Verification link sent to your email. Please verify before logging in.", "success");
             auth.signOut();
-            toggleMode();
+            toggleBtn.click(); // Switch back to login view
           });
         })
         .catch((error) => {
