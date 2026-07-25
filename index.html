@@ -44,7 +44,7 @@
       font-size: 1rem;
     }
     input:focus { outline: none; border-color: #00E676; }
-    button {
+    button.main-btn {
       width: 100%;
       padding: 12px;
       background: #00E676;
@@ -56,7 +56,7 @@
       cursor: pointer;
       margin-top: 10px;
     }
-    button:hover { background: #00C853; }
+    button.main-btn:hover { background: #00C853; }
     .toggle-btn {
       background: none;
       color: #2979FF;
@@ -98,10 +98,10 @@
         <input type="password" id="password" placeholder="••••••••" required>
       </div>
 
-      <button type="submit" id="submitBtn">Sign In</button>
+      <button type="submit" class="main-btn" id="submitBtn">Sign In</button>
     </form>
 
-    <button type="button" class="toggle-btn" id="toggleBtn">Need an account? Create One</button>
+    <button type="button" class="toggle-btn" id="toggleBtn" onclick="toggleMode()">Need an account? Create One</button>
   </div>
 
 <script>
@@ -112,14 +112,37 @@
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
 
-  let isSignUpMode = false;
+  var isSignUpMode = false;
 
-  const formTitle = document.getElementById('formTitle');
-  const submitBtn = document.getElementById('submitBtn');
-  const toggleBtn = document.getElementById('toggleBtn');
-  const alertBox  = document.getElementById('alertBox');
+  // Function called directly by button click
+  function toggleMode() {
+    isSignUpMode = !isSignUpMode;
+    var formTitle = document.getElementById('formTitle');
+    var submitBtn = document.getElementById('submitBtn');
+    var toggleBtn = document.getElementById('toggleBtn');
+    var alertBox  = document.getElementById('alertBox');
 
-  // Check if user is already logged in & verified
+    alertBox.style.display = 'none';
+
+    if (isSignUpMode) {
+      formTitle.innerText = "Register Account";
+      submitBtn.innerText = "Create Account & Send Verification";
+      toggleBtn.innerText = "Already have an account? Login";
+    } else {
+      formTitle.innerText = "Operator Login";
+      submitBtn.innerText = "Sign In";
+      toggleBtn.innerText = "Need an account? Create One";
+    }
+  }
+
+  function showAlert(msg, type) {
+    var alertBox = document.getElementById('alertBox');
+    alertBox.innerText = msg;
+    alertBox.className = "alert-msg " + type;
+    alertBox.style.display = "block";
+  }
+
+  // Check Auth status
   auth.onAuthStateChanged((user) => {
     if (user) {
       if (user.emailVerified) {
@@ -130,49 +153,29 @@
     }
   });
 
-  // Event listener for toggling mode
-  toggleBtn.addEventListener('click', function() {
-    isSignUpMode = !isSignUpMode;
-    alertBox.style.display = 'none';
-    if (isSignUpMode) {
-      formTitle.innerText = "Register Account";
-      submitBtn.innerText = "Create Account & Send Verification";
-      toggleBtn.innerText = "Already have an account? Login";
-    } else {
-      formTitle.innerText = "Operator Login";
-      submitBtn.innerText = "Sign In";
-      toggleBtn.innerText = "Need an account? Create One";
-    }
-  });
-
-  function showAlert(msg, type) {
-    alertBox.innerText = msg;
-    alertBox.className = "alert-msg " + type;
-    alertBox.style.display = "block";
-  }
-
-  document.getElementById('authForm').addEventListener('submit', (e) => {
+  // Handle Form Submission
+  document.getElementById('authForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    var email = document.getElementById('email').value;
+    var password = document.getElementById('password').value;
 
-    alertBox.style.display = 'none';
+    document.getElementById('alertBox').style.display = 'none';
 
     if (isSignUpMode) {
-      // Create Account & Send Verification
+      // Create Account & Send Verification Link
       auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
           userCredential.user.sendEmailVerification().then(() => {
             showAlert("Account created! Verification link sent to your email. Please verify before logging in.", "success");
             auth.signOut();
-            toggleBtn.click(); // Switch back to login view
+            toggleMode();
           });
         })
         .catch((error) => {
           showAlert(error.message, "error");
         });
     } else {
-      // Sign In
+      // Sign In User
       auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
           if (!userCredential.user.emailVerified) {
