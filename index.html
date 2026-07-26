@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LTE Monitor - Operator Login</title>
   
-  <!-- Firebase SDKs (v8 Compat SDKs for simple HTML script tags) -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   
@@ -105,7 +105,7 @@
   </div>
 
 <script>
-  // Complete Firebase Configuration from your console
+  // Complete Firebase Configuration from your Console
   const firebaseConfig = {
     apiKey: "AIzaSyDSJ7AJhy9zrOB0zsgmRAGebq5o7b0Xpb8",
     authDomain: "glte-lora-monitor-analyzer.firebaseapp.com",
@@ -166,20 +166,25 @@
           showAlert("Registration Failed: " + error.message, "error");
         });
     } else {
-      // Attempt Sign In
+      // Try Sign In first
       auth.signInWithEmailAndPassword(email, password)
         .then(() => {
           window.location.href = "dashboard.html";
         })
         .catch((error) => {
-          // If the account doesn't exist yet, automatically create it and direct to dashboard
-          if (error.code === 'auth/user-not-found') {
+          // Auto-create account if credentials don't exist in Firebase yet
+          var errStr = JSON.stringify(error);
+          if (
+            error.code === 'auth/user-not-found' || 
+            error.code === 'auth/invalid-login-credentials' ||
+            errStr.includes('INVALID_LOGIN_CREDENTIALS')
+          ) {
             auth.createUserWithEmailAndPassword(email, password)
               .then(() => {
                 window.location.href = "dashboard.html";
               })
               .catch((regErr) => {
-                showAlert("Login/Setup Failed: " + regErr.message, "error");
+                showAlert("Account Setup Failed: " + regErr.message, "error");
               });
           } else {
             showAlert("Login Failed: " + error.message, "error");
