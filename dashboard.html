@@ -3,130 +3,361 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>4G/LTE spectrum Monitor Dashboard</title>
+  <title>Global LTE & LoRa Monitor Dashboard</title>
   
-  <!-- Firebase SDKs -->
+  <!-- Firebase SDKs (v8) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  
+  <!-- Chart.js for Signal History Graph -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
+    :root {
+      --bg-color: #0F1218;
+      --card-bg: #181C24;
+      --card-border: #2A303C;
+      --accent-green: #00E676;
+      --accent-blue: #2979FF;
+      --accent-red: #FF1744;
+      --accent-orange: #FF9100;
+      --text-main: #FFFFFF;
+      --text-sub: #A0AABF;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: #FFFFFF;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
       margin: 0;
       padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      box-sizing: border-box;
     }
-    .top-bar {
-      width: 100%;
-      max-width: 800px;
+
+    .header-bar {
+      max-width: 1200px;
+      margin: 0 auto 20px auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      background: var(--card-bg);
+      padding: 15px 20px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
     }
+
+    .header-title h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: var(--accent-green);
+    }
+
+    .header-title p {
+      margin: 3px 0 0 0;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
     .logout-btn {
-      background: #FF1744;
+      background: var(--accent-red);
       color: #FFF;
       border: none;
       padding: 8px 16px;
       border-radius: 6px;
+      font-weight: bold;
       cursor: pointer;
-      font-weight: bold;
     }
-    h1 { color: #00E676; margin: 5px 0; text-align: center; }
-    p.sub { color: #888; text-align: center; margin-bottom: 25px; }
 
-    .status-card {
-      width: 100%;
-      max-width: 800px;
-      padding: 15px;
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Status & Top Info Bar */
+    .status-banner {
+      background: var(--card-bg);
+      border: 2px solid var(--accent-green);
       border-radius: 10px;
-      border: 2px solid #00E676;
-      background: #1E1E1E;
+      padding: 15px;
       text-align: center;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       font-weight: bold;
-      color: #00E676;
-      margin-bottom: 25px;
-      box-sizing: border-box;
+      color: var(--accent-green);
     }
 
-    .grid-container {
-      width: 100%;
-      max-width: 800px;
+    /* KPI Circular Gauge Grid */
+    .kpi-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 15px;
     }
 
-    .card {
-      background: #1E1E1E;
-      border: 1px solid #333;
-      border-radius: 10px;
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .kpi-title {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    /* Circular Round Gauge SVG */
+    .gauge-container {
+      position: relative;
+      width: 110px;
+      height: 110px;
+    }
+
+    .gauge-svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+
+    .gauge-bg {
+      fill: none;
+      stroke: #2A303C;
+      stroke-width: 8;
+    }
+
+    .gauge-progress {
+      fill: none;
+      stroke: var(--accent-green);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 283;
+      transition: stroke-dashoffset 0.5s ease, stroke 0.3s ease;
+    }
+
+    .gauge-value {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--text-main);
       text-align: center;
     }
 
-    .card label {
-      display: block;
-      color: #888;
-      font-size: 0.85rem;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+    .gauge-unit {
+      font-size: 0.75rem;
+      color: var(--text-sub);
     }
 
-    .card .value {
-      font-size: 1.6rem;
+    /* Graph Section */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .panel-header {
+      font-size: 1rem;
       font-weight: bold;
-      color: #00E676;
+      color: var(--accent-blue);
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chart-box {
+      position: relative;
+      height: 280px;
+      width: 100%;
+    }
+
+    /* Alerts and Logs */
+    .alert-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .alert-item {
+      background: #241418;
+      border-left: 4px solid var(--accent-red);
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    .alert-time {
+      color: var(--text-sub);
+      font-size: 0.75rem;
+    }
+
+    .alert-msg {
+      color: #FF8A80;
+      font-weight: bold;
+      margin-top: 3px;
+    }
+
+    .location-card {
+      margin-top: 15px;
+      padding: 12px;
+      background: #222733;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .maps-btn {
-      margin-top: 25px;
-      background: #2979FF;
+      background: var(--accent-blue);
       color: #FFF;
-      border: none;
-      padding: 12px 24px;
-      font-size: 1rem;
-      font-weight: bold;
-      border-radius: 8px;
-      cursor: pointer;
       text-decoration: none;
-      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: bold;
     }
-    .maps-btn:hover { background: #2962FF; }
   </style>
 </head>
 <body>
 
-  <div class="top-bar">
-    <span id="userEmail" style="color:#AAA;">Operator Loading...</span>
+  <!-- Top Navigation Header -->
+  <div class="header-bar">
+    <div class="header-title">
+      <h1>LTE / LoRa Spectrum Analyzer</h1>
+      <p id="userEmail">Operator: Loading...</p>
+    </div>
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
-  <h1>4G/LTE Monitor Dashboard</h1>
-  <p class="sub">Real-Time Cloud Telemetry</p>
+  <div class="dashboard-container">
+    
+    <!-- Overall Status Banner -->
+    <div class="status-banner" id="statusCard">
+      STATUS: CONNECTING TO CLOUD...
+    </div>
 
-  <div class="status-card" id="statusCard">
-    STATUS: CONNECTING TO CLOUD SERVER...
+    <!-- KPI Round Gauges -->
+    <div class="kpi-grid">
+      
+      <!-- RSSI -->
+      <div class="kpi-card">
+        <div class="kpi-title">RSSI</div>
+        <div class="gauge-container">
+          <svg class="gauge-svg" viewBox="0 0 100 100">
+            <circle class="gauge-bg" cx="50" cy="50" r="45"></circle>
+            <circle class="gauge-progress" id="rssiCircle" cx="50" cy="50" r="45"></circle>
+          </svg>
+          <div class="gauge-value"><span id="valRssi">-</span><br><span class="gauge-unit">dBm</span></div>
+        </div>
+      </div>
+
+      <!-- RSRP -->
+      <div class="kpi-card">
+        <div class="kpi-title">RSRP</div>
+        <div class="gauge-container">
+          <svg class="gauge-svg" viewBox="0 0 100 100">
+            <circle class="gauge-bg" cx="50" cy="50" r="45"></circle>
+            <circle class="gauge-progress" id="rsrpCircle" cx="50" cy="50" r="45"></circle>
+          </svg>
+          <div class="gauge-value"><span id="valRsrp">-</span><br><span class="gauge-unit">dBm</span></div>
+        </div>
+      </div>
+
+      <!-- SINR -->
+      <div class="kpi-card">
+        <div class="kpi-title">SINR</div>
+        <div class="gauge-container">
+          <svg class="gauge-svg" viewBox="0 0 100 100">
+            <circle class="gauge-bg" cx="50" cy="50" r="45"></circle>
+            <circle class="gauge-progress" id="sinrCircle" cx="50" cy="50" r="45"></circle>
+          </svg>
+          <div class="gauge-value"><span id="valSinr">-</span><br><span class="gauge-unit">dB</span></div>
+        </div>
+      </div>
+
+      <!-- Noise Floor -->
+      <div class="kpi-card">
+        <div class="kpi-title">Noise Floor</div>
+        <div class="gauge-container">
+          <svg class="gauge-svg" viewBox="0 0 100 100">
+            <circle class="gauge-bg" cx="50" cy="50" r="45"></circle>
+            <circle class="gauge-progress" id="nfCircle" cx="50" cy="50" r="45"></circle>
+          </svg>
+          <div class="gauge-value"><span id="valNf">-</span><br><span class="gauge-unit">dBm</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Main Graph & Alerts Grid -->
+    <div class="main-grid">
+      
+      <!-- Telemetry Trend Chart -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <span>Signal Telemetry Trend</span>
+          <span id="valBand" style="color: var(--text-sub); font-size: 0.85rem;">Band: -</span>
+        </div>
+        <div class="chart-box">
+          <canvas id="telemetryChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Alerts / Interference Log & GPS -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <span>Interference Events</span>
+        </div>
+        
+        <ul class="alert-list" id="alertList">
+          <li class="alert-item" style="border-left-color: var(--accent-blue); background: #1B2333;">
+            <div class="alert-time">System Startup</div>
+            <div class="alert-msg" style="color:#A0C4FF;">Listening for RF telemetries...</div>
+          </li>
+        </ul>
+
+        <div class="location-card">
+          <div>
+            <div style="font-size: 0.75rem; color: var(--text-sub);">GPS COORDINATES</div>
+            <div id="valGps" style="font-weight: bold; font-size: 0.9rem;">0.0000, 0.0000</div>
+          </div>
+          <a id="mapsLink" href="#" target="_blank" class="maps-btn">Map</a>
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
-
-  <div class="grid-container">
-    <div class="card"><label>Band</label><div class="value" id="valBand">-</div></div>
-    <div class="card"><label>RSSI</label><div class="value" id="valRssi">- dBm</div></div>
-    <div class="card"><label>RSRP</label><div class="value" id="valRsrp">- dBm</div></div>
-    <div class="card"><label>SINR</label><div class="value" id="valSinr">- dB</div></div>
-    <div class="card"><label>Noise Floor</label><div class="value" id="valNf">- dBm</div></div>
-    <div class="card"><label>Location</label><div class="value" id="valGps">0.0, 0.0</div></div>
-  </div>
-
-  <a id="mapsLink" href="#" target="_blank" class="maps-btn">view Possible jamming Location on Google Maps</a>
 
 <script>
   const firebaseConfig = {
@@ -144,46 +375,169 @@
   const auth = firebase.auth();
   const db = firebase.database();
 
-  // Redirect if not logged in
+  // Auth Guard
   auth.onAuthStateChanged(user => {
     if (user) {
       document.getElementById('userEmail').innerText = "Operator: " + user.email;
+      initChart();
       listenToTelemetry();
     } else {
       window.location.href = "index.html";
     }
   });
 
+  // Chart Setup
+  let chart;
+  function initChart() {
+    const ctx = document.getElementById('telemetryChart').getContext('2d');
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'RSRP (dBm)',
+            data: [],
+            borderColor: '#00E676',
+            backgroundColor: 'rgba(0, 230, 118, 0.1)',
+            tension: 0.3,
+            fill: true
+          },
+          {
+            label: 'SINR (dB)',
+            data: [],
+            borderColor: '#2979FF',
+            backgroundColor: 'transparent',
+            tension: 0.3
+          },
+          {
+            label: 'Noise Floor (dBm)',
+            data: [],
+            borderColor: '#FF1744',
+            backgroundColor: 'transparent',
+            tension: 0.3,
+            borderDash: [4, 4]
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { grid: { color: '#2A303C' }, ticks: { color: '#A0AABF' } },
+          y: { grid: { color: '#2A303C' }, ticks: { color: '#A0AABF' } }
+        },
+        plugins: {
+          legend: { labels: { color: '#FFFFFF' } }
+        }
+      }
+    });
+  }
+
+  // Update KPI Round Gauge SVGs
+  function updateGauge(circleId, val, min, max, color) {
+    const circle = document.getElementById(circleId);
+    if (!circle) return;
+    
+    let numVal = parseFloat(val);
+    if (isNaN(numVal)) numVal = min;
+
+    // Clamp value
+    if (numVal < min) numVal = min;
+    if (numVal > max) numVal = max;
+
+    const circumference = 2 * Math.PI * 45; // ~283
+    const percentage = (numVal - min) / (max - min);
+    const offset = circumference - (percentage * circumference);
+
+    circle.style.strokeDashoffset = offset;
+    circle.style.stroke = color;
+  }
+
+  let lastStatus = "";
+
   function listenToTelemetry() {
     db.ref('/lte_monitor').on('value', (snapshot) => {
       const data = snapshot.val();
-      if (data) {
-        document.getElementById('statusCard').innerText = "STATUS: " + (data.status || "NORMAL");
-        
-        // Change status color dynamically based on text
-        if ((data.status || "").includes("INTERFERENCE")) {
-          document.getElementById('statusCard').style.borderColor = "#FF1744";
-          document.getElementById('statusCard').style.color = "#FF1744";
-        } else if ((data.status || "").includes("OFFLINE")) {
-          document.getElementById('statusCard').style.borderColor = "#FF9100";
-          document.getElementById('statusCard').style.color = "#FF9100";
-        } else {
-          document.getElementById('statusCard').style.borderColor = "#00E676";
-          document.getElementById('statusCard').style.color = "#00E676";
-        }
+      if (!data) return;
 
-        document.getElementById('valBand').innerText = data.band || "-";
-        document.getElementById('valRssi').innerText = (data.rssi || "-") + " dBm";
-        document.getElementById('valRsrp').innerText = (data.rsrp || "-") + " dBm";
-        document.getElementById('valSinr').innerText = (data.sinr || "-") + " dB";
-        document.getElementById('valNf').innerText = (data.nf || "-") + " dBm";
-        
-        const lat = data.lat || "0.000000";
-        const lon = data.lon || "0.000000";
-        document.getElementById('valGps').innerText = lat + ", " + lon;
-        document.getElementById('mapsLink').href = `https://www.google.com/maps?q=${lat},${lon}`;
+      const status = data.status || "NORMAL";
+      const rsrp   = data.rsrp || "-";
+      const rssi   = data.rssi || "-";
+      const sinr   = data.sinr || "-";
+      const nf     = data.nf || "-";
+      const band   = data.band || "-";
+      const lat    = data.lat || "0.000000";
+      const lon    = data.lon || "0.000000";
+
+      // Status Banner
+      const statusCard = document.getElementById('statusCard');
+      statusCard.innerText = "STATUS: " + status;
+
+      if (status.includes("INTERFERENCE")) {
+        statusCard.style.borderColor = "#FF1744";
+        statusCard.style.color = "#FF1744";
+      } else if (status.includes("OFFLINE")) {
+        statusCard.style.borderColor = "#FF9100";
+        statusCard.style.color = "#FF9100";
+      } else {
+        statusCard.style.borderColor = "#00E676";
+        statusCard.style.color = "#00E676";
+      }
+
+      // Values text
+      document.getElementById('valRssi').innerText = rssi;
+      document.getElementById('valRsrp').innerText = rsrp;
+      document.getElementById('valSinr').innerText = sinr;
+      document.getElementById('valNf').innerText   = nf;
+      document.getElementById('valBand').innerText = "Band: " + band;
+      document.getElementById('valGps').innerText  = `${lat}, ${lon}`;
+      document.getElementById('mapsLink').href    = `https://www.google.com/maps?q=${lat},${lon}`;
+
+      // Update Round Gauges
+      updateGauge('rssiCircle', rssi, -120, -30, '#00E676');
+      updateGauge('rsrpCircle', rsrp, -140, -44, '#00E676');
+      updateGauge('sinrCircle', sinr, -10, 30, '#2979FF');
+      updateGauge('nfCircle',   nf,   -130, -50, status.includes("INTERFERENCE") ? '#FF1744' : '#FF9100');
+
+      // Update Chart
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      if (chart) {
+        chart.data.labels.push(timeStr);
+        chart.data.datasets[0].data.push(parseFloat(rsrp) || null);
+        chart.data.datasets[1].data.push(parseFloat(sinr) || null);
+        chart.data.datasets[2].data.push(parseFloat(nf) || null);
+
+        if (chart.data.labels.length > 12) {
+          chart.data.labels.shift();
+          chart.data.datasets.forEach(dataset => dataset.data.shift());
+        }
+        chart.update();
+      }
+
+      // Log Interference Events
+      if (status !== lastStatus) {
+        if (status.includes("INTERFERENCE")) {
+          addAlertItem(`HIGH INTERFERENCE DETECTED! (RSRP: ${rsrp}dBm, NF: ${nf}dBm)`);
+        } else if (status.includes("OFFLINE")) {
+          addAlertItem(`Transmitter Lost / TX Offline`, '#FF9100');
+        }
+        lastStatus = status;
       }
     });
+  }
+
+  function addAlertItem(message, color = '#FF1744') {
+    const list = document.getElementById('alertList');
+    const time = new Date().toLocaleTimeString();
+    const li = document.createElement('li');
+    li.className = 'alert-item';
+    li.style.borderLeftColor = color;
+    li.innerHTML = `
+      <div class="alert-time">${time}</div>
+      <div class="alert-msg" style="color: ${color};">${message}</div>
+    `;
+    list.prepend(li);
   }
 
   function logout() {
