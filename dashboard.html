@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Global LTE LoRa Monitor Dashboard</title>
   
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
+  <!-- EmailJS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
     (function(){
@@ -59,14 +61,15 @@
   <a id="mapLink" class="map-btn" href="#" target="_blank">View Location on Google Maps</a>
 
 <script>
+  // Initialize Firebase Config
   const firebaseConfig = {
     databaseURL: "https://glte-lora-monitor-analyzer-default-rtdb.firebaseio.com/"
   };
   firebase.initializeApp(firebaseConfig);
 
-  // Guard: Strictly requires user to be logged in AND emailVerified
+  // Security Guard: Checks if operator is authenticated (no email verification required)
   firebase.auth().onAuthStateChanged((user) => {
-    if (!user || !user.emailVerified) {
+    if (!user) {
       window.location.href = "index.html";
     } else {
       document.getElementById('userEmail').innerText = "Operator: " + user.email;
@@ -79,6 +82,7 @@
     });
   }
 
+  // Database Listener
   var dbRef = firebase.database().ref('lte_monitor');
   let emailSent = false;
 
@@ -101,6 +105,7 @@
       if (data.status && data.status.includes("INTERFERENCE")) {
         sCard.classList.add("status-interf");
 
+        // Send Email Alert ONCE per incident via EmailJS
         if (!emailSent) {
           emailSent = true;
           const currentUser = firebase.auth().currentUser;
