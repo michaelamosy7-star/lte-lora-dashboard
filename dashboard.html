@@ -2,141 +2,196 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Global LTE LoRa Monitor Dashboard</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-
-  <!-- EmailJS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script>
-    (function(){
-       emailjs.init("f2-11jU0Sjcqc8-d6");
-    })();
-  </script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <style>
-    body { font-family: Arial, sans-serif; background-color: #121212; color: #FFFFFF; text-align: center; margin: 0; padding: 20px; }
-    h1 { color: #00E676; margin-bottom: 5px; }
-    .header-bar { display: flex; justify-content: space-between; align-items: center; max-width: 800px; margin: 0 auto 10px; }
-    .logout-btn { background: #FF1744; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-    .logout-btn:hover { background: #D50000; }
-    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; max-width: 800px; margin: 20px auto; }
-    .card { background: #1E1E1E; padding: 15px; border-radius: 10px; border: 1px solid #333; }
-    .card h3 { margin: 0; font-size: 0.9rem; color: #888; }
-    .card p { margin: 10px 0 0; font-size: 1.4rem; font-weight: bold; color: #00E676; }
-    .status-box { background: #1E1E1E; padding: 20px; border-radius: 10px; max-width: 800px; margin: 0 auto 20px; font-size: 1.3rem; font-weight: bold; }
-    .status-normal { border: 2px solid #00E676; color: #00E676; }
-    .status-interf { border: 2px solid #FF1744; color: #FF1744; background: #3A0007; }
-    .status-offline { border: 2px solid #FF9100; color: #FF9100; }
-    a.map-btn { display: inline-block; padding: 10px 20px; background: #2979FF; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px; font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #FFFFFF;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .top-bar {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .logout-btn {
+      background: #FF1744;
+      color: #FFF;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    h1 { color: #00E676; margin: 5px 0; text-align: center; }
+    p.sub { color: #888; text-align: center; margin-bottom: 25px; }
+
+    .status-card {
+      width: 100%;
+      max-width: 800px;
+      padding: 15px;
+      border-radius: 10px;
+      border: 2px solid #00E676;
+      background: #1E1E1E;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #00E676;
+      margin-bottom: 25px;
+      box-sizing: border-box;
+    }
+
+    .grid-container {
+      width: 100%;
+      max-width: 800px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    .card {
+      background: #1E1E1E;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .card label {
+      display: block;
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .card .value {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #00E676;
+    }
+
+    .maps-btn {
+      margin-top: 25px;
+      background: #2979FF;
+      color: #FFF;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .maps-btn:hover { background: #2962FF; }
   </style>
 </head>
 <body>
 
-  <div class="header-bar">
-    <span id="userEmail" style="color: #888; font-size: 0.9rem;">Operator Loading...</span>
-    <button class="logout-btn" onclick="logoutUser()">Logout</button>
+  <div class="top-bar">
+    <span id="userEmail" style="color:#AAA;">Operator Loading...</span>
+    <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
   <h1>Global LTE Monitor Dashboard</h1>
-  <p>Real-Time Cloud Telemetry</p>
+  <p class="sub">Real-Time Cloud Telemetry</p>
 
-  <div id="statusCard" class="status-box status-normal">
-    STATUS: <span id="statusVal">CONNECTING TO CLOUD...</span>
+  <div class="status-card" id="statusCard">
+    STATUS: CONNECTING TO CLOUD...
   </div>
 
-  <div class="card-grid">
-    <div class="card"><h3>BAND</h3><p id="bandVal">-</p></div>
-    <div class="card"><h3>RSSI</h3><p id="rssiVal">- dB</p></div>
-    <div class="card"><h3>RSRP</h3><p id="rsrpVal">- dB</p></div>
-    <div class="card"><h3>SINR</h3><p id="sinrVal">- dB</p></div>
-    <div class="card"><h3>NOISE FLOOR</h3><p id="nfVal">- dB</p></div>
-    <div class="card"><h3>LOCATION</h3><p id="locVal">0.0, 0.0</p></div>
+  <div class="grid-container">
+    <div class="card"><label>Band</label><div class="value" id="valBand">-</div></div>
+    <div class="card"><label>RSSI</label><div class="value" id="valRssi">- dBm</div></div>
+    <div class="card"><label>RSRP</label><div class="value" id="valRsrp">- dBm</div></div>
+    <div class="card"><label>SINR</label><div class="value" id="valSinr">- dB</div></div>
+    <div class="card"><label>Noise Floor</label><div class="value" id="valNf">- dBm</div></div>
+    <div class="card"><label>Location</label><div class="value" id="valGps">0.0, 0.0</div></div>
   </div>
 
-  <a id="mapLink" class="map-btn" href="#" target="_blank">View Location on Google Maps</a>
+  <a id="mapsLink" href="#" target="_blank" class="maps-btn">View Location on Google Maps</a>
 
 <script>
-  // Initialize Firebase Config
   const firebaseConfig = {
-    databaseURL: "https://glte-lora-monitor-analyzer-default-rtdb.firebaseio.com/"
+    apiKey: "AIzaSyDSJ7AJhy9zrOB0zsgmRAGebq5o7b0Xpb8",
+    authDomain: "glte-lora-monitor-analyzer.firebaseapp.com",
+    databaseURL: "https://glte-lora-monitor-analyzer-default-rtdb.firebaseio.com",
+    projectId: "glte-lora-monitor-analyzer",
+    storageBucket: "glte-lora-monitor-analyzer.firebasestorage.app",
+    messagingSenderId: "370930551415",
+    appId: "1:370930551415:web:2286579d85a48331311472",
+    measurementId: "G-KWBNPTJYW6"
   };
-  firebase.initializeApp(firebaseConfig);
 
-  // Security Guard: Checks if operator is authenticated (no email verification required)
-  firebase.auth().onAuthStateChanged((user) => {
-    if (!user) {
-      window.location.href = "index.html";
-    } else {
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  // Redirect if not logged in
+  auth.onAuthStateChanged(user => {
+    if (user) {
       document.getElementById('userEmail').innerText = "Operator: " + user.email;
+      listenToTelemetry();
+    } else {
+      window.location.href = "index.html";
     }
   });
 
-  function logoutUser() {
-    firebase.auth().signOut().then(() => {
-      window.location.href = "index.html";
+  function listenToTelemetry() {
+    db.ref('/lte_monitor').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        document.getElementById('statusCard').innerText = "STATUS: " + (data.status || "NORMAL");
+        
+        // Change status color dynamically based on text
+        if ((data.status || "").includes("INTERFERENCE")) {
+          document.getElementById('statusCard').style.borderColor = "#FF1744";
+          document.getElementById('statusCard').style.color = "#FF1744";
+        } else if ((data.status || "").includes("OFFLINE")) {
+          document.getElementById('statusCard').style.borderColor = "#FF9100";
+          document.getElementById('statusCard').style.color = "#FF9100";
+        } else {
+          document.getElementById('statusCard').style.borderColor = "#00E676";
+          document.getElementById('statusCard').style.color = "#00E676";
+        }
+
+        document.getElementById('valBand').innerText = data.band || "-";
+        document.getElementById('valRssi').innerText = (data.rssi || "-") + " dBm";
+        document.getElementById('valRsrp').innerText = (data.rsrp || "-") + " dBm";
+        document.getElementById('valSinr').innerText = (data.sinr || "-") + " dB";
+        document.getElementById('valNf').innerText = (data.nf || "-") + " dBm";
+        
+        const lat = data.lat || "0.000000";
+        const lon = data.lon || "0.000000";
+        document.getElementById('valGps').innerText = lat + ", " + lon;
+        document.getElementById('mapsLink').href = `https://www.google.com/maps?q=${lat},${lon}`;
+      }
     });
   }
 
-  // Database Listener
-  var dbRef = firebase.database().ref('lte_monitor');
-  let emailSent = false;
-
-  dbRef.on('value', (snapshot) => {
-    var data = snapshot.val();
-    if(data) {
-      document.getElementById('bandVal').innerText = data.band || "-";
-      document.getElementById('rssiVal').innerText = (data.rssi || "-") + " dB";
-      document.getElementById('rsrpVal').innerText = (data.rsrp || "-") + " dB";
-      document.getElementById('sinrVal').innerText = (data.sinr || "-") + " dB";
-      document.getElementById('nfVal').innerText   = (data.nf || "-") + " dB";
-      document.getElementById('locVal').innerText  = (data.lat || "0") + ", " + (data.lon || "0");
-      document.getElementById('statusVal').innerText = data.status || "WAITING";
-
-      document.getElementById('mapLink').href = `https://maps.google.com/?q=${data.lat},${data.lon}`;
-
-      var sCard = document.getElementById('statusCard');
-      sCard.className = "status-box ";
-
-      if (data.status && data.status.includes("INTERFERENCE")) {
-        sCard.classList.add("status-interf");
-
-        // Send Email Alert ONCE per incident via EmailJS
-        if (!emailSent) {
-          emailSent = true;
-          const currentUser = firebase.auth().currentUser;
-
-          var templateParams = {
-            lat: data.lat,
-            lon: data.lon,
-            band: data.band,
-            rssi: data.rssi,
-            rsrp: data.rsrp,
-            sinr: data.sinr,
-            to_email: currentUser ? currentUser.email : "michaelamosy7@gmail.com"
-          };
-
-          emailjs.send('service_z89apoc', 'template_vilun9j', templateParams)
-            .then(function(response) {
-               console.log('ALERT EMAIL SENT!', response.status, response.text);
-            }, function(error) {
-               console.log('EMAIL FAILED TO SEND...', error);
-            });
-        }
-
-      } else if (data.status && data.status.includes("OFFLINE")) {
-        sCard.classList.add("status-offline");
-        emailSent = false;
-      } else {
-        sCard.classList.add("status-normal");
-        emailSent = false;
-      }
-    }
-  });
+  function logout() {
+    auth.signOut().then(() => {
+      window.location.href = "index.html";
+    });
+  }
 </script>
+
 </body>
 </html>
