@@ -125,7 +125,7 @@
 
     if (isSignUpMode) {
       formTitle.innerText = "Register Account";
-      submitBtn.innerText = "Create Account & Send Verification";
+      submitBtn.innerText = "Create Account";
       toggleBtn.innerText = "Already have an account? Login";
     } else {
       formTitle.innerText = "Operator Login";
@@ -139,7 +139,6 @@
     alertBox.innerText = msg;
     alertBox.className = "alert-msg " + type;
     alertBox.style.display = "block";
-    alert(msg); // Also triggers browser popup alert
   }
 
   // Handle Form Submission
@@ -151,34 +150,19 @@
     document.getElementById('alertBox').style.display = 'none';
 
     if (isSignUpMode) {
-      // Create Account & Send Verification Link
+      // Create Account & Direct Redirect
       auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
-          userCredential.user.sendEmailVerification()
-            .then(() => {
-              showAlert("Account created successfully! Verification email sent to " + email + ". Please check your inbox or spam folder.", "success");
-              auth.signOut();
-              toggleMode();
-            })
-            .catch((err) => {
-              showAlert("Account created, but verification email failed: " + err.message, "error");
-            });
+          window.location.href = "dashboard.html";
         })
         .catch((error) => {
           showAlert("Registration Failed: " + error.message, "error");
         });
     } else {
-      // Sign In User
+      // Direct Sign In
       auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-          userCredential.user.reload().then(() => {
-            if (!userCredential.user.emailVerified) {
-              showAlert("Email not verified yet! Please check your inbox/spam folder.", "error");
-              auth.signOut();
-            } else {
-              window.location.href = "dashboard.html";
-            }
-          });
+          window.location.href = "dashboard.html";
         })
         .catch((error) => {
           showAlert("Login Failed: " + error.message, "error");
