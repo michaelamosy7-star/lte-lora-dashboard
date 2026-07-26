@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Global LTE LoRa Monitor Dashboard</title>
+  <title>4G/LTE spectrum Monitor Dashboard</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -110,11 +110,11 @@
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
-  <h1>Global LTE Monitor Dashboard</h1>
+  <h1>LTE Monitor Dashboard</h1>
   <p class="sub">Real-Time Cloud Telemetry</p>
 
   <div class="status-card" id="statusCard">
-    STATUS: CONNECTING TO CLOUD...
+    STATUS: CONNECTING TO CLOUD SERVER...
   </div>
 
   <div class="grid-container">
@@ -126,7 +126,7 @@
     <div class="card"><label>Location</label><div class="value" id="valGps">0.0, 0.0</div></div>
   </div>
 
-  <a id="mapsLink" href="#" target="_blank" class="maps-btn">View Location on Google Maps</a>
+  <a id="mapsLink" href="#" target="_blank" class="maps-btn">Possible jamming Locatio on Google Maps</a>
 
 <script>
   const firebaseConfig = {
