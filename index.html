@@ -5,22 +5,76 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LTE Monitor - Operator Login</title>
   
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   
   <style>
-    body { font-family: Arial, sans-serif; background-color: #121212; color: #FFFFFF; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-    .auth-container { background: #1E1E1E; padding: 30px; border-radius: 12px; border: 1px solid #333; width: 100%; max-width: 380px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #FFFFFF;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .auth-container {
+      background: #1E1E1E;
+      padding: 30px;
+      border-radius: 12px;
+      border: 1px solid #333;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
     h2 { color: #00E676; text-align: center; margin-top: 0; }
     p.subtitle { text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 20px; }
     .form-group { margin-bottom: 15px; }
     label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: #BBB; }
-    input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #444; background: #2A2A2A; color: #FFF; box-sizing: border-box; font-size: 1rem; }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #2A2A2A;
+      color: #FFF;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
     input:focus { outline: none; border-color: #00E676; }
-    button.main-btn { width: 100%; padding: 12px; background: #00E676; color: #000; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    button.main-btn {
+      width: 100%;
+      padding: 12px;
+      background: #00E676;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
     button.main-btn:hover { background: #00C853; }
-    .toggle-btn { background: none; color: #2979FF; border: none; margin-top: 15px; text-decoration: underline; cursor: pointer; font-size: 0.9rem; width: 100%; }
-    .alert-msg { padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.85rem; display: none; text-align: center; }
+    .toggle-btn {
+      background: none;
+      color: #2979FF;
+      border: none;
+      margin-top: 15px;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 0.9rem;
+      width: 100%;
+    }
+    .alert-msg {
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 0.85rem;
+      display: none;
+      text-align: center;
+    }
     .error { background: #3A0007; color: #FF1744; border: 1px solid #FF1744; }
     .success { background: #00270F; color: #00E676; border: 1px solid #00E676; }
   </style>
@@ -29,28 +83,31 @@
 
   <div class="auth-container">
     <h2 id="formTitle">Operator Login</h2>
-    <p class="subtitle">LTE/LoRa Spectrum Monitor Portal</p>
+    <p class="subtitle">LTE Spectrum Monitor Portal</p>
 
     <div id="alertBox" class="alert-msg"></div>
 
     <form id="authForm">
       <div class="form-group">
         <label for="email">Operator Email</label>
-        <input type="email" id="email" placeholder="operator@example.com" required>
+
+        <!-- Default Credentials Pre-filled -->
+        <input type="email" id="email" value="michaelamosy7@gmail.com" placeholder="operator@example.com" required>
       </div>
 
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" placeholder="••••••••" required>
+        <input type="password" id="password" value="12345678" placeholder="••••••••" required>
       </div>
 
-      <button type="submit" class="main-btn" id="submitBtn">Sign In</button>
+      <button type="submit" class="main-btn" id="submitBtn">Sign In as Default Operator</button>
     </form>
 
     <button type="button" class="toggle-btn" id="toggleBtn" onclick="toggleMode()">Need an account? Create One</button>
   </div>
 
 <script>
+  // Firebase Configuration
   const firebaseConfig = {
     databaseURL: "https://glte-lora-monitor-analyzer-default-rtdb.firebaseio.com/"
   };
@@ -70,11 +127,11 @@
 
     if (isSignUpMode) {
       formTitle.innerText = "Register Account";
-      submitBtn.innerText = "Create Account & Send Email";
+      submitBtn.innerText = "Create Account";
       toggleBtn.innerText = "Already have an account? Login";
     } else {
       formTitle.innerText = "Operator Login";
-      submitBtn.innerText = "Sign In";
+      submitBtn.innerText = "Sign In as Default Operator";
       toggleBtn.innerText = "Need an account? Create One";
     }
   }
@@ -86,6 +143,7 @@
     alertBox.style.display = "block";
   }
 
+  // Handle Form Submission
   document.getElementById('authForm').addEventListener('submit', function(e) {
     e.preventDefault();
     var email = document.getElementById('email').value;
@@ -94,36 +152,19 @@
     document.getElementById('alertBox').style.display = 'none';
 
     if (isSignUpMode) {
-      // Step 1: Create Account
+      // Create Account & Direct Access
       auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
-          // Step 2: Send Email Verification
-          userCredential.user.sendEmailVerification()
-            .then(() => {
-              showAlert("Account created! Verification email sent to " + email + ". Please check your Inbox and Spam folder before logging in.", "success");
-              auth.signOut(); // Force sign out until verified
-              toggleMode();
-            })
-            .catch((err) => {
-              showAlert("Account created, but email failed to send: " + err.message, "error");
-            });
+          window.location.href = "dashboard.html";
         })
         .catch((error) => {
           showAlert("Registration Failed: " + error.message, "error");
         });
     } else {
-      // Step 3: Login Check
+      // Direct Login (bypassing verification for default operator)
       auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-          userCredential.user.reload().then(() => {
-            // Check if user has verified email
-            if (!userCredential.user.emailVerified) {
-              showAlert("Email not verified! Please click the verification link sent to your email inbox/spam folder.", "error");
-              auth.signOut();
-            } else {
-              window.location.href = "dashboard.html";
-            }
-          });
+          window.location.href = "dashboard.html";
         })
         .catch((error) => {
           showAlert("Login Failed: " + error.message, "error");
