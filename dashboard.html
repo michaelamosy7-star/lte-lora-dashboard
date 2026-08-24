@@ -77,7 +77,6 @@
       gap: 20px;
     }
 
-    /* Status & Top Info Bar */
     .status-banner {
       background: var(--card-bg);
       border: 2px solid var(--accent-green);
@@ -88,6 +87,77 @@
       font-weight: bold;
       color: var(--accent-green);
     }
+
+    /* Band Selector Controls */
+    .band-selector-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .band-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .band-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .band-badge {
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .band-controls-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    @media (max-width: 768px) {
+      .band-controls-grid { grid-template-columns: 1fr; }
+    }
+
+    .band-dropdown, .bandwidth-dropdown {
+      width: 100%;
+      padding: 10px 12px;
+      background: #0B0F17;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      color: var(--accent-green);
+      font-size: 0.9rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .band-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      background: #0B0F17;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+    }
+
+    .spec-item { display: flex; flex-direction: column; }
+    .spec-label { font-size: 0.7rem; color: var(--text-sub); text-transform: uppercase; }
+    .spec-value { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
 
     /* KPI Circular Gauge Grid */
     .kpi-grid {
@@ -105,7 +175,6 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      position: relative;
     }
 
     .kpi-title {
@@ -116,25 +185,9 @@
       margin-bottom: 12px;
     }
 
-    /* Circular Round Gauge SVG */
-    .gauge-container {
-      position: relative;
-      width: 110px;
-      height: 110px;
-    }
-
-    .gauge-svg {
-      transform: rotate(-90deg);
-      width: 100%;
-      height: 100%;
-    }
-
-    .gauge-bg {
-      fill: none;
-      stroke: #2A303C;
-      stroke-width: 8;
-    }
-
+    .gauge-container { position: relative; width: 110px; height: 110px; }
+    .gauge-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+    .gauge-bg { fill: none; stroke: #2A303C; stroke-width: 8; }
     .gauge-progress {
       fill: none;
       stroke: var(--accent-green);
@@ -147,8 +200,7 @@
 
     .gauge-value {
       position: absolute;
-      top: 50%;
-      left: 50%;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       font-size: 1.1rem;
       font-weight: bold;
@@ -156,23 +208,16 @@
       text-align: center;
     }
 
-    .gauge-unit {
-      font-size: 0.75rem;
-      color: var(--text-sub);
-    }
+    .gauge-unit { font-size: 0.75rem; color: var(--text-sub); }
 
-    /* Graph Section */
+    /* Main Grid & Chart Panel */
     .main-grid {
       display: grid;
       grid-template-columns: 2fr 1fr;
       gap: 20px;
     }
 
-    @media (max-width: 900px) {
-      .main-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+    @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
 
     .panel-card {
       background: var(--card-bg);
@@ -189,19 +234,45 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
-    .chart-box {
-      position: relative;
-      height: 280px;
-      width: 100%;
+    .chart-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
+
+    .time-btn, .export-btn {
+      background: #0B0F17;
+      border: 1px solid var(--card-border);
+      color: var(--text-sub);
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .time-btn.active {
+      background: var(--accent-blue);
+      color: #FFF;
+      border-color: var(--accent-blue);
+    }
+
+    .export-btn {
+      background: var(--accent-green);
+      color: #000;
+      border: none;
+    }
+
+    .chart-box { position: relative; height: 280px; width: 100%; }
 
     /* Alerts and Logs */
     .alert-list {
       list-style: none;
-      padding: 0;
-      margin: 0;
+      padding: 0; margin: 0;
       max-height: 250px;
       overflow-y: auto;
     }
@@ -215,16 +286,8 @@
       font-size: 0.85rem;
     }
 
-    .alert-time {
-      color: var(--text-sub);
-      font-size: 0.75rem;
-    }
-
-    .alert-msg {
-      color: #FF8A80;
-      font-weight: bold;
-      margin-top: 3px;
-    }
+    .alert-time { color: var(--text-sub); font-size: 0.75rem; }
+    .alert-msg { color: #FF8A80; font-weight: bold; margin-top: 3px; }
 
     .location-card {
       margin-top: 15px;
@@ -260,9 +323,55 @@
 
   <div class="dashboard-container">
     
-    <!-- Overall Status Banner -->
+    <!-- Status Banner -->
     <div class="status-banner" id="statusCard">
       STATUS: CONNECTING TO CLOUD...
+    </div>
+
+    <!-- Multi-Band Bandwidth Selection Card -->
+    <div class="band-selector-card">
+      <div class="band-header">
+        <span class="band-title">Multi-Band Spectrum Target Selector</span>
+        <span id="activeBandBadge" class="band-badge">ACTIVE: BAND 3</span>
+      </div>
+
+      <div class="band-controls-grid">
+        <select id="lteBandSelect" class="band-dropdown" onchange="onBandChange(this.value)">
+          <option value="1">Band 1 — 2100 MHz (IMT / Core LTE)</option>
+          <option value="3" selected>Band 3 — 1800 MHz (DCS / Urban LTE)</option>
+          <option value="7">Band 7 — 2600 MHz (IMT-E / High Capacity)</option>
+          <option value="8">Band 8 — 900 MHz (EGSM / Extended Range)</option>
+          <option value="20">Band 20 — 800 MHz (EUDD / Long Distance Rural)</option>
+        </select>
+
+        <select id="bandwidthSelect" class="bandwidth-dropdown" onchange="onBandwidthChange(this.value)">
+          <option value="1.4">1.4 MHz (6 RBs)</option>
+          <option value="3">3.0 MHz (15 RBs)</option>
+          <option value="5">5.0 MHz (25 RBs)</option>
+          <option value="10">10.0 MHz (50 RBs)</option>
+          <option value="15">15.0 MHz (75 RBs)</option>
+          <option value="20" selected>20.0 MHz (100 RBs)</option>
+        </select>
+      </div>
+
+      <div class="band-specs-grid">
+        <div class="spec-item">
+          <span class="spec-label">Uplink Freq</span>
+          <span id="ulFreq" class="spec-value">1710 - 1785 MHz</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Downlink Freq</span>
+          <span id="dlFreq" class="spec-value">1805 - 1880 MHz</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Duplex Mode</span>
+          <span class="spec-value">FDD</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Resource Blocks</span>
+          <span id="specRB" class="spec-value">100 RBs</span>
+        </div>
+      </div>
     </div>
 
     <!-- KPI Round Gauges -->
@@ -325,14 +434,20 @@
       <div class="panel-card">
         <div class="panel-header">
           <span>Signal Telemetry Trend</span>
-          <span id="valBand" style="color: var(--text-sub); font-size: 0.85rem;">Band: -</span>
+          
+          <div class="chart-controls">
+            <button class="time-btn active" id="btn1m" onclick="setTimeframe(1)">1 Min</button>
+            <button class="time-btn" id="btn10m" onclick="setTimeframe(10)">10 Min</button>
+            <button class="time-btn" id="btn1h" onclick="setTimeframe(60)">1 Hr</button>
+            <button class="export-btn" onclick="exportCSVData()">Export CSV</button>
+          </div>
         </div>
         <div class="chart-box">
           <canvas id="telemetryChart"></canvas>
         </div>
       </div>
 
-      <!-- Alerts / Interference Log & GPS -->
+      <!-- Alerts & GPS Location -->
       <div class="panel-card">
         <div class="panel-header">
           <span>Interference Events</span>
@@ -360,6 +475,31 @@
   </div>
 
 <script>
+  // LTE 5 Band Table Specs
+  const lteBands = {
+    "1":  { name: "Band 1",  ul: "1920 - 1980 MHz", dl: "2110 - 2170 MHz" },
+    "3":  { name: "Band 3",  ul: "1710 - 1785 MHz", dl: "1805 - 1880 MHz" },
+    "7":  { name: "Band 7",  ul: "2500 - 2570 MHz", dl: "2620 - 2690 MHz" },
+    "8":  { name: "Band 8",  ul: "880 - 915 MHz",   dl: "925 - 960 MHz"   },
+    "20": { name: "Band 20", ul: "832 - 862 MHz",   dl: "791 - 821 MHz"   }
+  };
+
+  const rbMapping = { "1.4": "6 RBs", "3": "15 RBs", "5": "25 RBs", "10": "50 RBs", "15": "75 RBs", "20": "100 RBs" };
+
+  function onBandChange(selectedBand) {
+    const bandData = lteBands[selectedBand];
+    if (!bandData) return;
+
+    document.getElementById("activeBandBadge").innerText = `ACTIVE: ${bandData.name.toUpperCase()}`;
+    document.getElementById("ulFreq").innerText = bandData.ul;
+    document.getElementById("dlFreq").innerText = bandData.dl;
+  }
+
+  function onBandwidthChange(selectedBw) {
+    document.getElementById("specRB").innerText = rbMapping[selectedBw] || "-";
+  }
+
+  // Firebase Configuration
   const firebaseConfig = {
     apiKey: "AIzaSyDSJ7AJhy9zrOB0zsgmRAGebq5o7b0Xpb8",
     authDomain: "glte-lora-monitor-analyzer.firebaseapp.com",
@@ -375,7 +515,6 @@
   const auth = firebase.auth();
   const db = firebase.database();
 
-  // Auth Guard
   auth.onAuthStateChanged(user => {
     if (user) {
       document.getElementById('userEmail').innerText = "Operator: " + user.email;
@@ -386,7 +525,25 @@
     }
   });
 
-  // Chart Setup
+  // Telemetry In-Memory Storage for Exporter and Chart Timeframes
+  let telemetryHistory = [];
+  let maxDataPoints = 12; // Default 1 min (~5s intervals)
+
+  function setTimeframe(minutes) {
+    document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+    if (minutes === 1) {
+      document.getElementById('btn1m').classList.add('active');
+      maxDataPoints = 12;
+    } else if (minutes === 10) {
+      document.getElementById('btn10m').classList.add('active');
+      maxDataPoints = 120;
+    } else if (minutes === 60) {
+      document.getElementById('btn1h').classList.add('active');
+      maxDataPoints = 720;
+    }
+    rebuildChartData();
+  }
+
   let chart;
   function initChart() {
     const ctx = document.getElementById('telemetryChart').getContext('2d');
@@ -395,6 +552,14 @@
       data: {
         labels: [],
         datasets: [
+          {
+            label: 'RSSI (dBm)',
+            data: [],
+            borderColor: '#FFD700',
+            backgroundColor: 'transparent',
+            tension: 0.3,
+            hidden: true
+          },
           {
             label: 'RSRP (dBm)',
             data: [],
@@ -434,7 +599,18 @@
     });
   }
 
-  // Update KPI Round Gauge SVGs
+  function rebuildChartData() {
+    if (!chart) return;
+    const sliced = telemetryHistory.slice(-maxDataPoints);
+
+    chart.data.labels = sliced.map(d => d.time);
+    chart.data.datasets[0].data = sliced.map(d => d.rssi);
+    chart.data.datasets[1].data = sliced.map(d => d.rsrp);
+    chart.data.datasets[2].data = sliced.map(d => d.sinr);
+    chart.data.datasets[3].data = sliced.map(d => d.nf);
+    chart.update();
+  }
+
   function updateGauge(circleId, val, min, max, color) {
     const circle = document.getElementById(circleId);
     if (!circle) return;
@@ -442,11 +618,10 @@
     let numVal = parseFloat(val);
     if (isNaN(numVal)) numVal = min;
 
-    // Clamp value
     if (numVal < min) numVal = min;
     if (numVal > max) numVal = max;
 
-    const circumference = 2 * Math.PI * 45; // ~283
+    const circumference = 2 * Math.PI * 45;
     const percentage = (numVal - min) / (max - min);
     const offset = circumference - (percentage * circumference);
 
@@ -466,7 +641,7 @@
       const rssi   = data.rssi || "-";
       const sinr   = data.sinr || "-";
       const nf     = data.nf || "-";
-      const band   = data.band || "-";
+      const band   = data.band || "3";
       const lat    = data.lat || "0.000000";
       const lon    = data.lon || "0.000000";
 
@@ -485,37 +660,38 @@
         statusCard.style.color = "#00E676";
       }
 
-      // Values text
+      // Update KPI Labels
       document.getElementById('valRssi').innerText = rssi;
       document.getElementById('valRsrp').innerText = rsrp;
       document.getElementById('valSinr').innerText = sinr;
       document.getElementById('valNf').innerText   = nf;
-      document.getElementById('valBand').innerText = "Band: " + band;
       document.getElementById('valGps').innerText  = `${lat}, ${lon}`;
       document.getElementById('mapsLink').href    = `https://www.google.com/maps?q=${lat},${lon}`;
 
-      // Update Round Gauges
+      // Update Gauges
       updateGauge('rssiCircle', rssi, -120, -30, '#00E676');
       updateGauge('rsrpCircle', rsrp, -140, -44, '#00E676');
       updateGauge('sinrCircle', sinr, -10, 30, '#2979FF');
       updateGauge('nfCircle',   nf,   -130, -50, status.includes("INTERFERENCE") ? '#FF1744' : '#FF9100');
 
-      // Update Chart
+      // Record to History
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      if (chart) {
-        chart.data.labels.push(timeStr);
-        chart.data.datasets[0].data.push(parseFloat(rsrp) || null);
-        chart.data.datasets[1].data.push(parseFloat(sinr) || null);
-        chart.data.datasets[2].data.push(parseFloat(nf) || null);
+      telemetryHistory.push({
+        time: timeStr,
+        rssi: parseFloat(rssi) || null,
+        rsrp: parseFloat(rsrp) || null,
+        sinr: parseFloat(sinr) || null,
+        nf: parseFloat(nf) || null,
+        band: band,
+        lat: lat,
+        lon: lon
+      });
 
-        if (chart.data.labels.length > 12) {
-          chart.data.labels.shift();
-          chart.data.datasets.forEach(dataset => dataset.data.shift());
-        }
-        chart.update();
-      }
+      if (telemetryHistory.length > 1000) telemetryHistory.shift();
 
-      // Log Interference Events
+      rebuildChartData();
+
+      // Log Alerts
       if (status !== lastStatus) {
         if (status.includes("INTERFERENCE")) {
           addAlertItem(`HIGH INTERFERENCE DETECTED! (RSRP: ${rsrp}dBm, NF: ${nf}dBm)`);
@@ -538,6 +714,28 @@
       <div class="alert-msg" style="color: ${color};">${message}</div>
     `;
     list.prepend(li);
+  }
+
+  // Export CSV Functionality
+  function exportCSVData() {
+    if (telemetryHistory.length === 0) {
+      alert("No telemetry data collected yet to export!");
+      return;
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,Timestamp,RSSI (dBm),RSRP (dBm),SINR (dB),Noise Floor (dBm),Band,Latitude,Longitude\n";
+
+    telemetryHistory.forEach(row => {
+      csvContent += `${row.time},${row.rssi},${row.rsrp},${row.sinr},${row.nf},${row.band},${row.lat},${row.lon}\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `LTE_Spectrum_Telemetry_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   function logout() {
