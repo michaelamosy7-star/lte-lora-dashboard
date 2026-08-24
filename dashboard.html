@@ -122,17 +122,10 @@
     }
 
     .band-controls-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 15px;
       margin-bottom: 15px;
     }
 
-    @media (max-width: 768px) {
-      .band-controls-grid { grid-template-columns: 1fr; }
-    }
-
-    .band-dropdown, .bandwidth-dropdown {
+    .band-dropdown {
       width: 100%;
       padding: 10px 12px;
       background: #0B0F17;
@@ -342,15 +335,6 @@
           <option value="7">Band 7 — 2600 MHz (IMT-E / High Capacity)</option>
           <option value="8">Band 8 — 900 MHz (EGSM / Extended Range)</option>
           <option value="20">Band 20 — 800 MHz (EUDD / Long Distance Rural)</option>
-        </select>
-
-        <select id="bandwidthSelect" class="bandwidth-dropdown">
-          <option value="1.4">1.4 MHz Bandwidth</option>
-          <option value="3">3.0 MHz Bandwidth</option>
-          <option value="5">5.0 MHz Bandwidth</option>
-          <option value="10">10.0 MHz Bandwidth</option>
-          <option value="15">15.0 MHz Bandwidth</option>
-          <option value="20" selected>20.0 MHz Bandwidth</option>
         </select>
       </div>
 
