@@ -22,6 +22,7 @@
       --accent-blue: #2979FF;
       --accent-red: #FF1744;
       --accent-orange: #FF9100;
+      --accent-yellow: #FFD700;
       --text-main: #FFFFFF;
       --text-sub: #A0AABF;
     }
@@ -260,7 +261,7 @@
       border: none;
     }
 
-    .chart-box { position: relative; height: 280px; width: 100%; }
+    .chart-box { position: relative; height: 320px; width: 100%; }
 
     /* Alerts and Logs */
     .alert-list {
@@ -321,7 +322,7 @@
       STATUS: CONNECTING TO CLOUD...
     </div>
 
-    <!-- Multi-Band Bandwidth Selection Card -->
+    <!-- Multi-Band Selection Card -->
     <div class="band-selector-card">
       <div class="band-header">
         <span class="band-title">Multi-Band Spectrum Target Selector</span>
@@ -529,45 +530,84 @@
           {
             label: 'RSSI (dBm)',
             data: [],
-            borderColor: '#FFD700',
-            backgroundColor: 'transparent',
-            tension: 0.3,
-            hidden: true
+            borderColor: '#FFD700', // Bright Gold / Yellow
+            backgroundColor: 'rgba(255, 215, 0, 0.05)',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: '#FFD700',
+            tension: 0.35,
+            hidden: false // RSSI IS NOW EXPLICITLY SHOWN
           },
           {
             label: 'RSRP (dBm)',
             data: [],
-            borderColor: '#00E676',
-            backgroundColor: 'rgba(0, 230, 118, 0.1)',
-            tension: 0.3,
+            borderColor: '#00E676', // Emerald Green
+            backgroundColor: 'rgba(0, 230, 118, 0.08)',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: '#00E676',
+            tension: 0.35,
             fill: true
           },
           {
             label: 'SINR (dB)',
             data: [],
-            borderColor: '#2979FF',
+            borderColor: '#2979FF', // Royal Blue
             backgroundColor: 'transparent',
-            tension: 0.3
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: '#2979FF',
+            tension: 0.35
           },
           {
             label: 'Noise Floor (dBm)',
             data: [],
-            borderColor: '#FF1744',
+            borderColor: '#FF1744', // Crimson Red
             backgroundColor: 'transparent',
-            tension: 0.3,
-            borderDash: [4, 4]
+            borderWidth: 2,
+            borderDash: [5, 5],
+            pointRadius: 3,
+            pointBackgroundColor: '#FF1744',
+            tension: 0.35
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
         scales: {
-          x: { grid: { color: '#2A303C' }, ticks: { color: '#A0AABF' } },
-          y: { grid: { color: '#2A303C' }, ticks: { color: '#A0AABF' } }
+          x: { 
+            grid: { color: 'rgba(42, 48, 60, 0.6)' }, 
+            ticks: { color: '#A0AABF', font: { size: 11 } } 
+          },
+          y: { 
+            grid: { color: 'rgba(42, 48, 60, 0.6)' }, 
+            ticks: { color: '#A0AABF', font: { size: 11 } } 
+          }
         },
         plugins: {
-          legend: { labels: { color: '#FFFFFF' } }
+          legend: { 
+            position: 'top',
+            labels: { 
+              color: '#FFFFFF',
+              usePointStyle: true,
+              boxWidth: 8,
+              padding: 15,
+              font: { size: 12, weight: 'bold' }
+            } 
+          },
+          tooltip: {
+            backgroundColor: '#181C24',
+            titleColor: '#00E676',
+            bodyColor: '#FFFFFF',
+            borderColor: '#2A303C',
+            borderWidth: 1,
+            padding: 10
+          }
         }
       }
     });
@@ -613,11 +653,16 @@
       const status = data.status || "NORMAL";
       const rsrp   = data.rsrp || "-";
       const rssi   = data.rssi || "-";
-      const sinr   = data.sinr || "-";
+      let sinr     = data.sinr || "-";
       const nf     = data.nf || "-";
       const band   = data.band || "3";
       const lat    = data.lat || "0.000000";
       const lon    = data.lon || "0.000000";
+
+      // Scale SINR if passed as an integer (e.g., 308 -> 30.8)
+      if (parseFloat(sinr) > 50) {
+        sinr = (parseFloat(sinr) / 10).toFixed(1);
+      }
 
       // Status Banner
       const statusCard = document.getElementById('statusCard');
@@ -643,7 +688,7 @@
       document.getElementById('mapsLink').href    = `https://www.google.com/maps?q=${lat},${lon}`;
 
       // Update Gauges
-      updateGauge('rssiCircle', rssi, -120, -30, '#00E676');
+      updateGauge('rssiCircle', rssi, -120, -30, '#FFD700');
       updateGauge('rsrpCircle', rsrp, -140, -44, '#00E676');
       updateGauge('sinrCircle', sinr, -10, 30, '#2979FF');
       updateGauge('nfCircle',   nf,   -130, -50, status.includes("INTERFERENCE") ? '#FF1744' : '#FF9100');
