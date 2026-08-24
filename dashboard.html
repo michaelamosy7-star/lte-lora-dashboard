@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Global LTE & LoRa Monitor Dashboard</title>
+  <title>Global LTE Monitor Dashboard</title>
   
   <!-- Firebase SDKs (v8) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -147,7 +147,7 @@
 
     .band-specs-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 10px;
       background: #0B0F17;
       padding: 12px;
@@ -315,7 +315,7 @@
   <!-- Top Navigation Header -->
   <div class="header-bar">
     <div class="header-title">
-      <h1>LTE / LoRa Spectrum Analyzer</h1>
+      <h1>LTE Spectrum Analyzer</h1>
       <p id="userEmail">Operator: Loading...</p>
     </div>
     <button class="logout-btn" onclick="logout()">Logout</button>
@@ -344,13 +344,13 @@
           <option value="20">Band 20 — 800 MHz (EUDD / Long Distance Rural)</option>
         </select>
 
-        <select id="bandwidthSelect" class="bandwidth-dropdown" onchange="onBandwidthChange(this.value)">
-          <option value="1.4">1.4 MHz (6 RBs)</option>
-          <option value="3">3.0 MHz (15 RBs)</option>
-          <option value="5">5.0 MHz (25 RBs)</option>
-          <option value="10">10.0 MHz (50 RBs)</option>
-          <option value="15">15.0 MHz (75 RBs)</option>
-          <option value="20" selected>20.0 MHz (100 RBs)</option>
+        <select id="bandwidthSelect" class="bandwidth-dropdown">
+          <option value="1.4">1.4 MHz Bandwidth</option>
+          <option value="3">3.0 MHz Bandwidth</option>
+          <option value="5">5.0 MHz Bandwidth</option>
+          <option value="10">10.0 MHz Bandwidth</option>
+          <option value="15">15.0 MHz Bandwidth</option>
+          <option value="20" selected>20.0 MHz Bandwidth</option>
         </select>
       </div>
 
@@ -366,10 +366,6 @@
         <div class="spec-item">
           <span class="spec-label">Duplex Mode</span>
           <span class="spec-value">FDD</span>
-        </div>
-        <div class="spec-item">
-          <span class="spec-label">Resource Blocks</span>
-          <span id="specRB" class="spec-value">100 RBs</span>
         </div>
       </div>
     </div>
@@ -484,8 +480,6 @@
     "20": { name: "Band 20", ul: "832 - 862 MHz",   dl: "791 - 821 MHz"   }
   };
 
-  const rbMapping = { "1.4": "6 RBs", "3": "15 RBs", "5": "25 RBs", "10": "50 RBs", "15": "75 RBs", "20": "100 RBs" };
-
   function onBandChange(selectedBand) {
     const bandData = lteBands[selectedBand];
     if (!bandData) return;
@@ -493,10 +487,6 @@
     document.getElementById("activeBandBadge").innerText = `ACTIVE: ${bandData.name.toUpperCase()}`;
     document.getElementById("ulFreq").innerText = bandData.ul;
     document.getElementById("dlFreq").innerText = bandData.dl;
-  }
-
-  function onBandwidthChange(selectedBw) {
-    document.getElementById("specRB").innerText = rbMapping[selectedBw] || "-";
   }
 
   // Firebase Configuration
