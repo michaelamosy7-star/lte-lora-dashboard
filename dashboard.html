@@ -511,6 +511,38 @@
   // Telemetry In-Memory Storage for Exporter and Chart Timeframes
   let telemetryHistory = [];
   let maxDataPoints = 12; // Default 1 min (~5s intervals)
+  let lastData = null;
+
+  // Send email telemetry every 50 seconds continuously
+  setInterval(() => {
+    if (lastData) {
+      triggerEmailAlert(lastData);
+    }
+  }, 50000);
+
+  function triggerEmailAlert(data) {
+    const currentStatus = data.status || "NORMAL";
+    const isInterference = currentStatus.includes("INTERFERENCE");
+
+    const templateParams = {
+      subject: isInterference 
+        ? "🚨 CRITICAL ALERT: LTE Signal Interference Detected!" 
+        : "✅ SYSTEM STATUS: LTE Signal Telemetry Report",
+      status: currentStatus,
+      rsrp: data.rsrp || "-",
+      rssi: data.rssi || "-",
+      sinr: data.sinr || "-",
+      nf: data.nf || "-",
+      band: data.band || "3",
+      lat: data.lat || "0.000000",
+      lon: data.lon || "0.000000",
+      gps_url: `https://www.google.com/maps?q=${data.lat},${data.lon}`
+    };
+
+    emailjs.send('service_z89apoc', 'template_xej3etr', templateParams)
+      .then(() => console.log(`Interval email sent successfully! Status: ${currentStatus}`))
+      .catch((err) => console.error('Failed to send email:', err));
+  }
 
   function setTimeframe(minutes) {
     document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
@@ -651,43 +683,15 @@
     circle.style.stroke = color;
   }
 
-  // EmailJS Alert Trigger Function with State Synchronization
-  let lastEmailStatus = "";
-  function triggerEmailAlert(data) {
-    const currentStatus = data.status || "NORMAL";
-
-    if (currentStatus !== lastEmailStatus && (currentStatus.includes("INTERFERENCE") || currentStatus.includes("NORMAL"))) {
-      const isInterference = currentStatus.includes("INTERFERENCE");
-
-      const templateParams = {
-        subject: isInterference 
-          ? "🚨 CRITICAL ALERT: LTE Signal Interference Detected!" 
-          : "✅ LTE SPECTRUM STATUS: LTE Signal Returned to Normal",
-        status: currentStatus,
-        rsrp: data.rsrp || "-",
-        rssi: data.rssi || "-",
-        sinr: data.sinr || "-",
-        nf: data.nf || "-",
-        band: data.band || "3",
-        lat: data.lat || "0.000000",
-        lon: data.lon || "0.000000",
-        gps_url: `https://www.google.com/maps?q=${data.lat},${data.lon}`
-      };
-
-      emailjs.send('service_z89apoc', 'template_xej3etr', templateParams)
-        .then(() => console.log(`Alert email sent successfully! Status: ${currentStatus}`))
-        .catch((err) => console.error('Failed to send email:', err));
-
-      lastEmailStatus = currentStatus;
-    }
-  }
-
   let lastStatus = "";
 
   function listenToTelemetry() {
     db.ref('/lte_monitor').on('value', (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
+
+      // Cache latest telemetry for interval email runner
+      lastData = data;
 
       const status = data.status || "NORMAL";
       const rsrp   = data.rsrp || "-";
@@ -697,9 +701,6 @@
       const band   = data.band || "3";
       const lat    = data.lat || "0.000000";
       const lon    = data.lon || "0.000000";
-
-      // Trigger EmailJS Alerts automatically on state changes
-      triggerEmailAlert(data);
 
       // Scale SINR if passed as an integer (e.g., 308 -> 30.8)
       if (parseFloat(sinr) > 50) {
