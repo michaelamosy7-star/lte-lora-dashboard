@@ -651,27 +651,31 @@
     circle.style.stroke = color;
   }
 
-  // EmailJS Alert Trigger Function
+  // EmailJS Alert Trigger Function with State Synchronization
   let lastEmailStatus = "";
   function triggerEmailAlert(data) {
-    const currentStatus = data.status || "";
+    const currentStatus = data.status || "NORMAL";
 
     if (currentStatus !== lastEmailStatus && (currentStatus.includes("INTERFERENCE") || currentStatus.includes("NORMAL"))) {
       const isInterference = currentStatus.includes("INTERFERENCE");
 
       const templateParams = {
-        subject: isInterference ? "🚨 CRITICAL ALERT: LTE Interference Detected!" : "✅ SYSTEM RESTORED: LTE Signal is NORMAL",
+        subject: isInterference 
+          ? "🚨 CRITICAL ALERT: LTE Signal Interference Detected!" 
+          : "✅ SYSTEM RESTORED: LTE Signal Returned to Normal",
         status: currentStatus,
         rsrp: data.rsrp || "-",
         rssi: data.rssi || "-",
         sinr: data.sinr || "-",
         nf: data.nf || "-",
         band: data.band || "3",
+        lat: data.lat || "0.000000",
+        lon: data.lon || "0.000000",
         gps_url: `https://www.google.com/maps?q=${data.lat},${data.lon}`
       };
 
       emailjs.send('service_z89apoc', 'template_xej3etr', templateParams)
-        .then(() => console.log('Alert email sent successfully to all recipients!'))
+        .then(() => console.log(`Alert email sent successfully! Status: ${currentStatus}`))
         .catch((err) => console.error('Failed to send email:', err));
 
       lastEmailStatus = currentStatus;
@@ -754,6 +758,8 @@
           addAlertItem(`HIGH INTERFERENCE DETECTED! (RSRP: ${rsrp}dBm, NF: ${nf}dBm)`);
         } else if (status.includes("OFFLINE")) {
           addAlertItem(`Transmitter Lost / TX Offline`, '#FF9100');
+        } else if (status.includes("NORMAL")) {
+          addAlertItem(`System restored to normal state`, '#00E676');
         }
         lastStatus = status;
       }
