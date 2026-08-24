@@ -49,40 +49,11 @@
       position: relative;
     }
 
-    /* System Status Bar Header */
-    .system-status-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid #1E293B;
-      border-radius: 6px;
-      padding: 6px 12px;
-      margin-bottom: 20px;
-      font-size: 0.72rem;
-      font-family: monospace;
-      color: var(--text-muted);
-    }
-
-    .status-indicator {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      background-color: var(--accent-green);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--accent-green);
-    }
-
-    /* Project Main Title */
+    /* Project Main Title - Set to Green */
     .project-title {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       font-weight: 800;
-      color: #FFFFFF;
+      color: var(--accent-green);
       text-align: center;
       letter-spacing: 1px;
       margin: 0 0 6px 0;
@@ -92,9 +63,9 @@
 
     .project-subtitle {
       text-align: center;
-      color: var(--accent-blue);
-      font-size: 0.8rem;
-      font-weight: 600;
+      color: var(--accent-green);
+      font-size: 0.85rem;
+      font-weight: 700;
       letter-spacing: 1.5px;
       text-transform: uppercase;
       margin-bottom: 22px;
@@ -104,8 +75,8 @@
 
     /* Login Subtitle */
     .login-heading {
-      color: var(--accent-green);
-      font-size: 1.15rem;
+      color: #FFFFFF;
+      font-size: 1.1rem;
       text-align: center;
       margin: 0 0 4px 0;
       font-weight: 700;
@@ -227,16 +198,7 @@
 <body>
 
   <div class="auth-container">
-    <!-- Top Hardware Status Bar -->
-    <div class="system-status-bar">
-      <div class="status-indicator">
-        <div class="dot"></div>
-        <span>SYSTEM: ONLINE</span>
-      </div>
-      <span>BAND: B3 / B7 / B20</span>
-    </div>
-
-    <!-- Main Project Header Title -->
+    <!-- Main Project Header Title (Green) -->
     <h1 class="project-title">IoT BASED SPECTRUM ANALYZER</h1>
     <div class="project-subtitle">FOR 4G / LTE NETWORK</div>
 
